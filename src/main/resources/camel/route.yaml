@@ -1,0 +1,20 @@
+- beans:
+    - name: yaml-datasource
+      type: org.springframework.jdbc.datasource.DriverManagerDataSource
+      properties:
+        driverClassName: 'org.postgresql.Driver'
+        url: 'jdbc:postgresql://localhost:5432/postgres'
+        username: 'postgres'
+        password: '{{hashicorp:database/password}}'
+
+- from:
+    uri: "timer:tick?period=2s"
+    steps:
+      - setBody:
+          expression:
+            constant:
+              expression: "select * from users"
+      - to:
+          uri: "jdbc:yaml-datasource"
+      - log:
+          message: ${body}
